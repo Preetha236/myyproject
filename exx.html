@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hillsmart Agri • Smart Agriculture for Hilly Areas</title>
+  <meta name="description" content="An innovative, responsive website for smart agriculture in hilly areas with Explore (irrigation methods) and a Farmers Dashboard." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f172a;           /* slate-900 */
+      --card: #111827;         /* gray-900 */
+      --muted: #94a3b8;        /* slate-400 */
+      --text: #e5e7eb;         /* gray-200 */
+      --accent: #22d3ee;       /* cyan-400 */
+      --accent-2: #a78bfa;     /* violet-400 */
+      --good: #34d399;         /* emerald-400 */
+      --warn: #f59e0b;         /* amber-500 */
+      --bad: #ef4444;          /* red-500 */
+      --ring: rgba(34, 211, 238, .35);
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    .light {
+      --bg: #f8fafc;           /* slate-50 */
+      --card: #ffffff;         
+      --muted: #475569;        /* slate-600 */
+      --text: #0f172a;         /* slate-900 */
+      --accent: #0891b2;       /* cyan-700 */
+      --accent-2: #6d28d9;     /* violet-700 */
+      --good: #059669;         /* emerald-600 */
+      --warn: #b45309;         /* amber-700 */
+      --bad: #b91c1c;          /* red-700 */
+      --ring: rgba(8, 145, 178, .25);
+      --shadow: 0 8px 24px rgba(2,6,23,.08);
+    }
+
+    * { box-sizing: border-box }
+    html, body { height: 100% }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 100% -10%, rgba(167,139,250,.08), transparent 60%),
+                  radial-gradient(1200px 800px at -10% 120%, rgba(34,211,238,.08), transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      line-height: 1.55;
+      transition: background .35s ease, color .35s ease;
+    }
+
+    /* Layout */
+    header {
+      position: sticky; top: 0; z-index: 20;
+      backdrop-filter: saturate(120%) blur(8px);
+      background: color-mix(in oklab, var(--bg) 85%, transparent);
+      border-bottom: 1px solid color-mix(in oklab, var(--muted) 20%, transparent);
+    }
+    .nav {
+      max-width: 1200px; margin: 0 auto; padding: .75rem 1rem; display:flex; align-items:center; gap: .75rem;
+    }
+    .brand { display:flex; align-items:center; gap:.6rem; font-weight:800; letter-spacing:.3px; }
+    .logo {
+      width: 34px; height: 34px; border-radius: 12px; display:grid; place-items:center; font-weight:900;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color:#0b1020; box-shadow: var(--shadow);
+    }
+    .navlinks { margin-left:auto; display:flex; gap:.25rem; flex-wrap:wrap }
+    .navlinks a {
+      text-decoration:none; color: var(--text); font-weight:600; padding:.55rem .8rem; border-radius:12px; 
+    }
+    .navlinks a.active, .navlinks a:hover { background: color-mix(in oklab, var(--accent) 12%, transparent) }
+
+    .toggle {
+      margin-left: .25rem; border:1px solid color-mix(in oklab, var(--muted) 25%, transparent);
+      background: var(--card); color: var(--text); border-radius: 12px; padding: .5rem .8rem; cursor:pointer;
+      display:flex; align-items:center; gap:.5rem; font-weight:600; box-shadow: var(--shadow);
+    }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 1.2rem; }
+
+    section { margin: 2rem 0 3.5rem; }
+    .grid { display:grid; gap: 1rem }
+    @media (min-width: 720px) { .grid.cols-3 { grid-template-columns: repeat(3, minmax(0,1fr)); } }
+    @media (min-width: 1024px) { .grid.cols-4 { grid-template-columns: repeat(4, minmax(0,1fr)); } }
+
+    .card {
+      background: var(--card); border:1px solid color-mix(in oklab, var(--muted) 20%, transparent);
+      border-radius: 18px; padding: 1rem; box-shadow: var(--shadow); position:relative; overflow:hidden;
+    }
+    .card h3 { margin:.25rem 0 .35rem; font-size: 1.05rem }
+    .muted { color: var(--muted) }
+    .pill { display:inline-flex; align-items:center; gap:.35rem; font-size:.8rem; font-weight:700; padding:.35rem .55rem; border-radius:999px; background: color-mix(in oklab, var(--accent) 16%, transparent); }
+
+    .hero {
+      display:grid; gap:1rem; align-items:center; grid-template-columns: 1fr; margin-top: 1rem;
+    }
+    @media (min-width: 900px) { .hero { grid-template-columns: 1.15fr .85fr } }
+    .hero .visual { aspect-ratio: 16/10; border-radius: 18px; overflow:hidden; position:relative; border: 1px solid color-mix(in oklab, var(--muted) 15%, transparent) }
+    .hero .visual canvas { width:100%; height:100%; display:block; background: radial-gradient(800px 320px at 0% 0%, rgba(34,211,238,.15), transparent 60%), linear-gradient(180deg, color-mix(in oklab, var(--card) 85%, transparent), transparent 40% ), url('https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=1200&auto=format&fit=crop') center/cover; filter:saturate(1.05) contrast(1.05) }
+
+    .cta { display:flex; gap:.6rem; flex-wrap:wrap; }
+    .btn { border:1px solid color-mix(in oklab, var(--muted) 25%, transparent); background: var(--card); color: var(--text); border-radius: 12px; padding:.75rem 1rem; font-weight:800; cursor:pointer; box-shadow: var(--shadow) }
+    .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #0b1020; border: none }
+    .btn:focus-visible { outline: 3px solid var(--ring) }
+
+    /* Explore cards with hover/flip "toggle over" */
+    .flip {
+      perspective: 1200px; position:relative; height: 240px;
+    }
+    .flip-inner { position:absolute; inset:0; transition: transform .7s cubic-bezier(.2,.8,.2,1); transform-style: preserve-3d; }
+    .flip:hover .flip-inner, .flip:focus-within .flip-inner { transform: rotateY(180deg) }
+    .flip-face { position:absolute; inset:0; backface-visibility: hidden; padding: 1rem }
+    .flip-back { transform: rotateY(180deg); background: color-mix(in oklab, var(--accent-2) 10%, var(--card)); }
+
+    .toolbar { display:flex; gap:.6rem; flex-wrap:wrap; margin: .5rem 0 1rem }
+    .chip { border:1px dashed color-mix(in oklab, var(--muted) 35%, transparent); padding:.5rem .7rem; border-radius: 999px; font-weight:700; cursor:pointer }
+    .chip.active { background: color-mix(in oklab, var(--accent) 14%, transparent) }
+    .search { flex:1; min-width: 220px; }
+    input[type="search"] {
+      width:100%; padding:.7rem 1rem; border-radius:12px; border:1px solid color-mix(in oklab, var(--muted) 25%, transparent); background: var(--card); color: var(--text);
+      box-shadow: inset 0 0 0 3px transparent; transition: box-shadow .2s ease
+    }
+    input[type="search"]:focus { outline: none; box-shadow: inset 0 0 0 3px var(--ring) }
+
+    /* Dashboard */
+    .kpis { display:grid; gap: .8rem }
+    @media (min-width: 720px) { .kpis { grid-template-columns: repeat(4, minmax(0,1fr)) } }
+    .kpi { padding: 1rem; border-radius: 16px; background: var(--card); border:1px solid color-mix(in oklab, var(--muted) 20%, transparent) }
+    .kpi strong { font-size: 1.5rem }
+
+    .two-col { display:grid; gap: 1rem }
+    @media (min-width: 1000px) { .two-col { grid-template-columns: 1.2fr 1fr } }
+
+    canvas.chart { width:100%; height: 260px }
+
+    .table { width: 100%; border-collapse: collapse; font-size: .95rem }
+    .table th, .table td { padding: .7rem .6rem; border-bottom: 1px dashed color-mix(in oklab, var(--muted) 25%, transparent) }
+    .tag { display:inline-block; padding:.2rem .5rem; border-radius:7px; font-size:.75rem; font-weight:800; background: color-mix(in oklab, var(--good) 20%, transparent) }
+    .tag.warn { background: color-mix(in oklab, var(--warn) 20%, transparent) }
+    .tag.bad { background: color-mix(in oklab, var(--bad) 20%, transparent) }
+
+    footer { opacity:.8; padding: 2rem 1rem; border-top: 1px solid color-mix(in oklab, var(--muted) 20%, transparent) }
+    .tiny { font-size:.8rem }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav">
+      <div class="brand"><div class="logo" aria-hidden="true">⛰</div>Hillsmart Agri</div>
+      <nav class="navlinks" aria-label="Primary">
+        <a href="#home" class="active">Home</a>
+        <a href="#explore">Explore</a>
+        <a href="#dashboard">Farmers Dashboard</a>
+        <a href="#about">About</a>
+      </nav>
+      <button class="toggle" id="themeToggle" title="Toggle light/dark (accesskey t)" accesskey="t">🌗 Theme</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- HOME / HERO -->
+    <section id="home">
+      <div class="hero">
+        <div>
+          <p class="pill">Hilly Terrains • Smart Water • Resilient Yields</p>
+          <h1 style="font-size: clamp(1.8rem, 2.8vw + 1rem, 3rem); margin:.3rem 0 .6rem; line-height:1.2">
+            Smarter Agriculture for Steep Landscapes
+          </h1>
+          <p class="muted" style="max-width: 60ch">
+            Plan irrigation on terraces, track soil moisture across altitudes, and optimise water with micro‑systems. Explore proven methods like drip, sprinkler, and gravity‑fed layouts adapted to mountain topography.
+          </p>
+          <div class="cta" style="margin-top:1rem">
+            <a class="btn primary" href="#explore">Explore Irrigation ➜</a>
+            <a class="btn" href="#dashboard">Open Dashboard</a>
+          </div>
+        </div>
+        <div class="visual card">
+          <canvas id="heroCanvas" aria-hidden="true"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPLORE -->
+    <section id="explore">
+      <div style="display:flex; align-items:baseline; gap:.6rem; flex-wrap:wrap">
+        <h2 style="margin:0">Explore Irrigation Methods</h2>
+        <span class="muted">(hover/tap to flip cards)</span>
+      </div>
+
+      <div class="toolbar">
+        <div class="search">
+          <input type="search" id="search" placeholder="Search methods, e.g., drip, fog nets, terraced..." />
+        </div>
+        <button class="chip active" data-filter="all">All</button>
+        <button class="chip" data-filter="water-saving">Water‑saving</button>
+        <button class="chip" data-filter="low-cost">Low cost</button>
+        <button class="chip" data-filter="hilly">Hilly/Terraced</button>
+        <button class="chip" data-filter="tech">IoT/Tech</button>
+      </div>
+
+      <div class="grid cols-3" id="methodGrid" aria-live="polite"></div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard">
+      <h2 style="margin:0 0 .5rem">Farmers Dashboard</h2>
+      <p class="muted" style="margin-top:0">Monitor your fields across elevations, schedule irrigation, and act on smart recommendations.</p>
+
+      <div class="kpis" id="kpis">
+        <div class="kpi"><div class="muted">Avg. Soil Moisture</div><strong id="kpiMoisture">—</strong></div>
+        <div class="kpi"><div class="muted">Water Used (7d)</div><strong id="kpiWater">—</strong></div>
+        <div class="kpi"><div class="muted">Pump Runtime</div><strong id="kpiPump">—</strong></div>
+        <div class="kpi"><div class="muted">Irrigation Efficiency</div><strong id="kpiEff">—</strong></div>
+      </div>
+
+      <div class="two-col" style="margin-top:1rem">
+        <div class="card">
+          <h3>Soil Moisture & Irrigation Events</h3>
+          <canvas id="moistureChart" class="chart" role="img" aria-label="Line chart of soil moisture and irrigation events"></canvas>
+        </div>
+        <div class="card">
+          <h3>Water Use Breakdown</h3>
+          <canvas id="waterPie" class="chart" role="img" aria-label="Pie chart of water consumption by method"></canvas>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:1rem">
+        <h3>Fields Overview</h3>
+        <div class="muted" style="margin-bottom:.5rem">Altitude-aware recommendations</div>
+        <div style="overflow:auto">
+          <table class="table" id="fieldsTable">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Altitude (m)</th>
+                <th>Moisture (%)</th>
+                <th>Method</th>
+                <th>Next Action</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top:1rem">
+        <div class="card">
+          <h3>Tasks</h3>
+          <ul id="taskList" style="margin:.3rem 0 0; padding-left:1.2rem"></ul>
+          <div style="display:flex; gap:.5rem; margin-top:.8rem">
+            <input id="taskInput" placeholder="Add a task (e.g., Flush drip line on Terrace 2)" style="flex:1; padding:.6rem .8rem; border-radius:10px; border:1px solid color-mix(in oklab, var(--muted) 25%, transparent); background: var(--card); color: var(--text)" />
+            <button class="btn" id="addTask">Add</button>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Smart Alerts</h3>
+          <div id="alerts"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT / FOOTER -->
+    <section id="about">
+      <div class="grid cols-3">
+        <div class="card">
+          <h3>Why hills are different</h3>
+          <p class="muted">Steep slopes cause runoff and soil loss. Terracing, contour planting, and micro‑irrigation minimise water waste while protecting soil structure.</p>
+        </div>
+        <div class="card">
+          <h3>Design principles</h3>
+          <ul class="muted">
+            <li>Gravity first; pumps only where needed</li>
+            <li>Shorter laterals; pressure regulation</li>
+            <li>Catchment storage + rainwater harvesting</li>
+            <li>Automation via soil sensors and timers</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Make it yours</h3>
+          <p class="muted">Use this as a starter. Connect to your sensors or farm records later. Theme toggle and components are built for rapid customisation.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="max-width:1200px; margin:0 auto">
+      <div class="tiny">© <span id="year"></span> Hillsmart Agri. Built for hilly communities. • <a href="#home" class="muted" style="text-decoration:none">Back to top ↑</a></div>
+    </div>
+  </footer>
+
+  <script>
+    // ======= Theme Toggle =======
+    const themeToggle = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') document.documentElement.classList.add('light');
+    themeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('light');
+      localStorage.setItem('theme', document.documentElement.classList.contains('light') ? 'light' : 'dark');
+    });
+
+    // Active nav link state on scroll
+    const sections = [...document.querySelectorAll('main section')];
+    const navLinks = [...document.querySelectorAll('.navlinks a')];
+    const setActive = () => {
+      let idx = 0, y = scrollY + innerHeight/3;
+      sections.forEach((s,i)=>{ if (y >= s.offsetTop) idx = i; });
+      navLinks.forEach(a=>a.classList.remove('active'));
+      navLinks[idx]?.classList.add('active');
+    };
+    addEventListener('scroll', setActive, { passive:true }); setActive();
+
+    // ======= Hero canvas: moving contour lines =======
+    const hc = document.getElementById('heroCanvas');
+    const hctx = hc.getContext('2d');
+    const fit = ()=>{ hc.width = hc.clientWidth; hc.height = hc.clientHeight; };
+    const lines=[]; let t=0; fit(); addEventListener('resize', fit);
+    for(let i=0;i<22;i++) lines.push({o:i*18});
+    function draw(){
+      hctx.clearRect(0,0,hc.width,hc.height);
+      hctx.lineWidth=1.2; hctx.globalAlpha=.9; hctx.lineCap='round';
+      lines.forEach((L,j)=>{
+        const y0 = (j*hc.height/lines.length + (Math.sin((t+L.o)/40)*12));
+        hctx.beginPath();
+        for(let x=0;x<hc.width;x+=6){
+          const y = y0 + Math.sin((x+t+L.o)/50)*4 + Math.sin((x+t)/120)*3;
+          if(x===0) hctx.moveTo(x,y); else hctx.lineTo(x,y);
+        }
+        const g = hctx.createLinearGradient(0,y0,hc.width,y0);
+        g.addColorStop(0,'#22d3ee'); g.addColorStop(1,'#a78bfa');
+        hctx.strokeStyle=g; hctx.stroke();
+      });
+      t+=1.2; requestAnimationFrame(draw);
+    }
+    draw();
+
+    // ======= Explore: irrigation methods data =======
+    const methods = [
+      { id:'drip', name:'Drip Irrigation (Gravity‑fed)', tags:['water-saving','hilly'], 
+        summary:'Slow, targeted watering along terraces using gravity from a header tank.',
+        details:'Use a hilltop storage tank (rainwater/stream) with pressure regulators (~1 bar). Keep laterals short (<50 m) and use 1–2 L/h emitters. Add air‑release valves at terrace ends; flush weekly to avoid sediment.' },
+      { id:'micro', name:'Micro‑sprinklers', tags:['water-saving','hilly'],
+        summary:'Low‑flow jets for orchards on slopes; uniform canopy coverage.',
+        details:'Spacing 2–5 m, flow 20–70 L/h each. Use anti‑drain valves to prevent line drainage on slopes. Ideal for coffee/tea/cardamom on benches.' },
+      { id:'sprinkler', name:'Portable Sprinklers', tags:['low-cost'],
+        summary:'Moveable sets for small terraces and nurseries.',
+        details:'Use quick‑coupling hoses across terraces. Operate at 2–3 bar. Mind wind drift at ridges; choose part‑circle nozzles to prevent runoff.' },
+      { id:'contour', name:'Contour Furrow + Mulch', tags:['low-cost','hilly'],
+        summary:'Shallow furrows along contour lines reduce runoff; mulch retains moisture.',
+        details:'Lay furrows level along contour; mulch with straw/pine needles. Add stone bunds and vegetative barriers (vetiver/lemongrass) to trap soil.' },
+      { id:'rain', name:'Rainwater Harvesting Tanks', tags:['low-cost','hilly'],
+        summary:'Capture roof/catchment runoff into ferro‑cement/HDPE tanks for gravity irrigation.',
+        details:'Use silt traps and first‑flush diverters. Size storage as 30–60 days of demand; protect with mesh and overflow to recharge pits.' },
+      { id:'fog', name:'Fog Nets / Dew Collectors', tags:['water-saving'],
+        summary:'Passive water capture in misty highlands; drip to storage troughs.',
+        details:'Mount vertical mesh perpendicular to prevailing wind. Combine with drip for seedbeds. Yield depends on fog density; clean nets monthly.' },
+      { id:'sensor', name:'Soil Moisture Sensors + Timer', tags:['tech','water-saving'],
+        summary:'Automate start/stop when moisture crosses thresholds; save water & energy.',
+        details:'Use 20–40% VWC targets (crop dependent). Place sensors at upper/mid/lower terraces to capture gradient. Fail‑safe manual override recommended.' },
+      { id:'hydrogel', name:'Hydrogel / Coco‑peat Amendments', tags:['water-saving','low-cost'],
+        summary:'Increase soil water holding in sandy/loamy terraces; cut irrigation frequency.',
+        details:'Blend 1–2 kg/acre hydrogel during bed prep; or heavy mulching with coco‑peat. Monitor salinity; avoid over‑application on clay soils.' },
+      { id:'check', name:'Check Dams & Infiltration Trenches', tags:['low-cost','hilly'],
+        summary:'Slow hillside runoff; recharge springs and wells.',
+        details:'Install staggered trenches (contour) and stone check dams in gullies. Maintain after monsoon; desilt annually.' },
+    ];
+
+    const grid = document.getElementById('methodGrid');
+    function renderMethods(filter='all', q=''){
+      const frag = document.createDocumentFragment();
+      const list = methods.filter(m=> (filter==='all' || m.tags.includes(filter)) && (m.name.toLowerCase().includes(q) || m.summary.toLowerCase().includes(q) || m.details.toLowerCase().includes(q)));
+      grid.innerHTML='';
+      list.forEach(m=>{
+        const card = document.createElement('div');
+        card.className='card flip';
+        card.tabIndex=0; card.setAttribute('role','button'); card.setAttribute('aria-label', m.name + ' details');
+        card.innerHTML = `
+          <div class="flip-inner">
+            <div class="flip-face">
+              <h3>${m.name}</h3>
+              <p class="muted">${m.summary}</p>
+              <div style="position:absolute; bottom: .9rem; left: 1rem; display:flex; gap:.4rem; flex-wrap:wrap">
+                ${m.tags.map(t=><span class="pill">#${t}</span>).join('')}
+              </div>
+            </div>
+            <div class="flip-face flip-back">
+              <h3>How to implement</h3>
+              <p class="muted">${m.details}</p>
+              <div class="muted" style="position:absolute; bottom: .9rem">Tip: Long‑press to keep this side visible.</div>
+            </div>
+          </div>`;
+        frag.appendChild(card);
+      });
+      grid.appendChild(frag);
+    }
+
+    // Toolbar actions
+    let currentFilter = 'all';
+    const chips = [...document.querySelectorAll('.chip')];
+    chips.forEach(c=>c.addEventListener('click',()=>{
+      chips.forEach(x=>x.classList.remove('active'));
+      c.classList.add('active');
+      currentFilter = c.dataset.filter;
+      renderMethods(currentFilter, document.getElementById('search').value.trim().toLowerCase());
+    }));
+    document.getElementById('search').addEventListener('input', (e)=>{
+      renderMethods(currentFilter, e.target.value.trim().toLowerCase());
+    });
+    renderMethods();
+
+    // ======= Dashboard mock data & charts =======
+    function rand(n){ return Math.round(Math.random()*n); }
+    function between(a,b){ return Math.round(a + Math.random()*(b-a)); }
+
+    const days = Array.from({length:14}, (_,i)=> new Date(Date.now() - (13-i)*86400000).toLocaleDateString());
+    const moisture = days.map(()=> between(22, 48));
+    const irrigationEvents = days.map(()=> Math.random()<.35 ? between(1,3) : 0);
+
+    // KPIs
+    const kpi = {
+      moisture: Math.round(moisture.reduce((a,b)=>a+b,0)/moisture.length),
+      water: irrigationEvents.reduce((a,b)=>a+b,0) * 220, // litres
+      pump: irrigationEvents.reduce((a,b)=>a+b,0) * 18 + ' h',
+      eff: (80 + rand(15)) + '%'
+    };
+    document.getElementById('kpiMoisture').textContent = kpi.moisture + '%';
+    document.getElementById('kpiWater').textContent = kpi.water + ' L';
+    document.getElementById('kpiPump').textContent = kpi.pump;
+    document.getElementById('kpiEff').textContent = kpi.eff;
+
+    // Line chart
+    const mctx = document.getElementById('moistureChart').getContext('2d');
+    new Chart(mctx, {
+      type: 'line',
+      data: {
+        labels: days,
+        datasets: [
+          { label:'Soil Moisture %', data: moisture, tension:.35, borderWidth:2, pointRadius:2 },
+          { label:'Irrigation Events', data: irrigationEvents, type:'bar', borderWidth:0 }
+        ]
+      },
+      options: {
+        responsive:true,
+        plugins: { legend: { position:'bottom' } },
+        scales: { y: { beginAtZero:true } }
+      }
+    });
+
+    // Pie chart
+    const wctx = document.getElementById('waterPie').getContext('2d');
+    new Chart(wctx, {
+      type: 'pie',
+      data: {
+        labels:['Drip','Micro‑sprinkler','Sprinkler','Manual'],
+        datasets:[{ data:[45, 28, 17, 10] }]
+      },
+      options: { plugins: { legend: { position:'bottom' } } }
+    });
+
+    // Fields table with altitude‑aware recommendations
+    const fields = [
+      { name:'Upper Terrace A', alt: 1420, m: between(24,42), method:'Drip', status:'OK' },
+      { name:'Mid Orchard B', alt: 1340, m: between(24,42), method:'Micro‑sprinkler', status:'ATTN' },
+      { name:'Lower Bench C', alt: 1270, m: between(24,42), method:'Sprinkler', status:'OK' },
+      { name:'Nursery Plot D', alt: 1295, m: between(24,42), method:'Manual/Can', status:'LOW' },
+    ];
+    const tbody = document.querySelector('#fieldsTable tbody');
+    fields.forEach(f=>{
+      const tr = document.createElement('tr');
+      const action = f.m < 28 ? 'Irrigate 25 min (drip)' : (f.m>45 ? 'Skip today' : 'Check at noon');
+      tr.innerHTML = `
+        <td>${f.name}</td>
+        <td>${f.alt}</td>
+        <td>${f.m}</td>
+        <td>${f.method}</td>
+        <td>${action}</td>
+        <td>${f.status==='OK' ? '<span class="tag">OK</span>' : f.status==='ATTN' ? '<span class="tag warn">ATTN</span>' : '<span class="tag bad">LOW</span>'}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    // Tasks
+    const taskUl = document.getElementById('taskList');
+    const tasks = [
+      'Flush drip line – Terrace A',
+      'Check pressure at end‑cap Terrace B',
+      'Clean rainwater filter (first flush)',
+    ];
+    const renderTasks = ()=>{
+      taskUl.innerHTML = tasks.map((t,i)=><li style="margin:.25rem 0">${t} <button data-i="${i}" class="tiny btn" style="margin-left:.4rem; padding:.1rem .4rem">Done</button></li>).join('');
+      taskUl.querySelectorAll('button').forEach(b=> b.addEventListener('click',()=>{ tasks.splice(+b.dataset.i,1); renderTasks(); }));
+    };
+    renderTasks();
+    document.getElementById('addTask').addEventListener('click', ()=>{
+      const inp = document.getElementById('taskInput');
+      if(!inp.value.trim()) return; tasks.push(inp.value.trim()); inp.value=''; renderTasks();
+    });
+const alertBox = document.getElementById('alerts');
+
+alerts.forEach(a => {
+  const d = document.createElement('div');
+  const bg = a.type === 'bad'
+    ? 'color-mix(in oklab, var(--bad) 15%, transparent)'
+    : a.type === 'warn'
+      ? 'color-mix(in oklab, var(--warn) 15%, transparent)'
+      : 'color-mix(in oklab, var(--accent) 12%, transparent)';
+
+  d.style.cssText = `
+    padding: .6rem .8rem;
+    border-radius: 12px;
+    margin: .4rem 0;
+    background: ${bg};
+  `;
+
+  d.textContent = a.text;
+  alertBox.appendChild(d);
+});
+
+  </script>
+</body>
+</html>
